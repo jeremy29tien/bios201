@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#this is a test line
+
 #Looks at fastq files
 head -8 NA12878_R1.fastq
 head -8 NA12878_R2.fastq
