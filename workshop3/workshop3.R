@@ -33,7 +33,7 @@ diag(log_cor) <- NA
 pheatmap(log_cor, show_rownames = TRUE)
 dev.new()
 
-#Dealing with batch effects -- patterns in sequencing data caused by way sample is handled before/during sequencing (eg. the environment the samples are left in, different sequencing runs). Can prove to be problematic if they overpower the actual biological signals we're looking for. Options to handle this / minimize risk:
+##Dealing with batch effects -- patterns in sequencing data caused by way sample is handled before/during sequencing (eg. the environment the samples are left in, different sequencing runs). Can prove to be problematic if they overpower the actual biological signals we're looking for. Options to handle this / minimize risk:
 #1. Loading covariates
 covariates = read.table("covariates.txt")
 #in linux: run 
@@ -69,3 +69,43 @@ dev.new()
 pca_mat = cor(t(as.matrix(pca$rotation[,3:6])))
 diag(pca_mat) = NA
 pheatmap(pca_mat)
+
+##DIFFERENTIAL EXPRESSION -- DESeq2 looks across samples for differentially expressed genes; the BIOS201 class has already given us the original read count data with simulated (above) sequencing batch effects removed. 
+#Question: How would we remove the batch effects once we've identified them? (we only identified them in prev section)
+counts = read.table("counts_denoised.txt")
+rownames(covariates) = covariates$samples
+dds <- DESeqDataSetFromMatrix(countData <- counts,
+                              colData <- covariates,
+                              design = ~ factor(status, levels=c("Norm","IPF")))
+dds <- DESeq(dds, betaPrior=FALSE)
+res_nosex = results(dds)
+plotMA(dds)
+
+#ASK STEPHEN to explain the DESeq2 graph
+dev.new()
+#Correct for individual's sex (covariate)
+dds <- DESeqDataSetFromMatrix(countData <- counts,
+                              colData <- covariates,
+                              design = ~ sex + factor(status, levels=c("Norm","IPF")))
+dds <- DESeq(dds, betaPrior=FALSE)
+res = results(dds)
+plotMA(dds)
+
+#Compare the strength of results between the sex-corrected DESeq2 run and the run with no covariates corrected.
+plot(log(res_nosex$pvalue, base=10), log(res$pvalue, base=10), xlim=c(-30,0), ylim=c(-30,0),
+            xlab="p-value, No sex correction", ylab="p-value, sex correction")
+abline(a=0,b=1)
+abline(a=-5,b=0,lty=3,col="red")
+abline(v=-5,lty=3,col="red")
+
+#see how many genes are differentially expressed
+print(sum(res_nosex$padj < 0.05, na.rm=TRUE))
+print(sum(res$padj < 0.05, na.rm=TRUE))
+
+print(head(res[order(res$pvalue),]))
+status <- c(rep("Norm", 7), rep("IPF", 8))
+boxplot(as.numeric(log_counts[rownames(log_counts)=="ENSG00000170962",]) ~ status)
+
+#MUC5B Gene - ENSG00000117983
+# DSP Gene - ENSG00000096696
+
