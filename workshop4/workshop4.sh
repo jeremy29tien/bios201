@@ -42,6 +42,7 @@ plotHeatmap -m Donor2596-NK.matrix.gz -out Donor2596-NK_heatmap.png \
   --xAxisLabel 'Distance (bp)' --samplesLabel Insertions --zMin 0 -z ATAC
 
 #Use MACS2 to call peaks. Peaks are areas of genome where we have a pileup of signal. In ATAC-seq, this represents accessible regions of genome
+#ISSUE: The program 'macs2' is currently not installed. To run 'macs2' please ask your administrator to install the package 'macs'
 macs2 callpeak --treatment Donor2596-NK.chr4.bam --name Donor2596-NK --format BAMPE --nomodel --call-summits --nolambda --keep-dup all -q 0.01 -g 1.7e8
 macs2 callpeak --treatment Donor4983-HSC.chr4.bam --name Donor4983-HSC --format BAMPE --nomodel --call-summits --nolambda --keep-dup all -q 0.01 -g 1.7e8
 macs2 callpeak --treatment Donor5483-NK.chr4.bam --name Donor5483-NK --format BAMPE --nomodel --call-summits --nolambda --keep-dup all -q 0.01 -g 1.7e8
