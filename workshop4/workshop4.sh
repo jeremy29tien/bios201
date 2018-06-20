@@ -42,14 +42,17 @@ plotHeatmap -m Donor2596-NK.matrix.gz -out Donor2596-NK_heatmap.png \
   --xAxisLabel 'Distance (bp)' --samplesLabel Insertions --zMin 0 -z ATAC
 
 #Use MACS2 to call peaks. Peaks are areas of genome where we have a pileup of signal. In ATAC-seq, this represents accessible regions of genome
-#ISSUE: The program 'macs2' is currently not installed. To run 'macs2' please ask your administrator to install the package 'macs'
+#FIXED-ISSUE: The program 'macs2' is currently not installed. To run 'macs2' please ask your administrator to install the package 'macs'
 macs2 callpeak --treatment Donor2596-NK.chr4.bam --name Donor2596-NK --format BAMPE --nomodel --call-summits --nolambda --keep-dup all -q 0.01 -g 1.7e8
 macs2 callpeak --treatment Donor4983-HSC.chr4.bam --name Donor4983-HSC --format BAMPE --nomodel --call-summits --nolambda --keep-dup all -q 0.01 -g 1.7e8
 macs2 callpeak --treatment Donor5483-NK.chr4.bam --name Donor5483-NK --format BAMPE --nomodel --call-summits --nolambda --keep-dup all -q 0.01 -g 1.7e8
 
+#View number of peaks for each sample
+wc -l Donor2596-NK_peaks.narrowPeak Donor4983-HSC_peaks.narrowPeak Donor5483-NK_peaks.narrowPeak
+
 #Visualizing Peaks -- be sure to update the URL
-echo 'track type=narrowPeak name="Donor2596 NK Peaks"' | cat - Donor2596-NK_peaks.narrowPeak > \
-      ~/afs-home/WWW/Donor2596-NK_peaks.narrowPeak 
+#Add this to the UCSC Genome Browser by using the URL: https://raw.githubusercontent.com/jeremy29tien/bios201/master/workshop4/Donor2596-NK_peaks.narrowPeak
+echo 'track type=narrowPeak name="Donor2596 NK Peaks"' | cat - Donor2596-NK_peaks.narrowPeak > ~/bios201/workshop4/Donor2596-NK_peaks.narrowPeak 
 
 #Manipulating peak files
 #Finds the intersection between peaks
@@ -61,6 +64,7 @@ bedtools intersect -a Donor7256-HSC_peaks.narrowPeak -b Donor4983-HSC_peaks.narr
 cat *.narrowPeak | bedtools sort -i stdin > all_peaks.bed
 #Merge overlapping peaks
 bedtools merge -i all_peaks.bed
+wc -l all_peaks.bed 
 
 #Find motifs (short, repeated sequences in genome) in peaks
 ##Slow - do not run during workshop
